@@ -43,17 +43,34 @@ class StackMotionEffect {
         const winsize = { width: window.innerWidth, height: window.innerHeight };
         const isMobile = winsize.width <= 768;
 
-        // Reset container tilt for cleaner testimonial-style reading
-        gsap.set(this.contentElement, {
-            rotateX: 0,
-            rotateY: 0,
-            rotateZ: 0,
-            opacity: 1
-        });
-
         if (this.tl) this.tl.kill();
 
-        // Create a scroll timeline - Restore full length for slow, deliberate feel
+        if (isMobile) {
+            // Static layout for mobile: No scroll pinning, just show the cards
+            gsap.set(this.wrapElement, { height: 'auto' });
+            gsap.set(this.contentElement, { position: 'relative', height: 'auto', top: 'auto', left: 'auto', transform: 'none' });
+            this.cards.forEach((card, i) => {
+                gsap.set(card, {
+                    position: 'relative',
+                    yPercent: 0,
+                    opacity: 1,
+                    scale: 1,
+                    marginBottom: '2rem',
+                    top: 'auto',
+                    left: 'auto',
+                    filter: 'none'
+                });
+            });
+            return;
+        }
+
+        // Desktop: Restore container settings
+        gsap.set(this.wrapElement, { height: '100vh' });
+        gsap.set(this.contentElement, {
+            rotateX: 0, rotateY: 0, rotateZ: 0, opacity: 1
+        });
+
+        // Create a scroll timeline for Desktop
         this.tl = gsap.timeline({
             scrollTrigger: {
                 trigger: this.wrapElement,
@@ -65,11 +82,9 @@ class StackMotionEffect {
             }
         });
 
-        // Testimonial-style stacking logic: 
         this.cards.forEach((card, i) => {
             const isLast = i === this.cards.length - 1;
 
-            // Initial: Hidden below the view
             gsap.set(card, {
                 yPercent: 150,
                 opacity: 0,
@@ -77,27 +92,24 @@ class StackMotionEffect {
                 z: 0
             });
 
-            // 1. Card enters and centers itself
             this.tl.to(card, {
                 yPercent: 0,
                 opacity: 1,
                 scale: 1,
-                duration: 1.2, // Slower, more elegant entry
+                duration: 1.2,
                 ease: 'power2.out'
             }, i);
 
-            // 2. Card stays centered for a moment (reading time)
             this.tl.to(card, {
-                duration: 0.6 // Longer pause for reading
+                duration: 0.6
             });
 
-            // 3. Card moves slightly UP and back (stacking)
             if (!isLast) {
                 this.tl.to(card, {
                     yPercent: -10,
                     scale: 0.95,
                     opacity: 0.5,
-                    filter: isMobile ? 'none' : 'blur(2px)', // Still keep blur off on mobile for performance
+                    filter: 'blur(2px)',
                     duration: 1.2,
                     ease: 'power2.inOut'
                 }, i + 1);
@@ -108,6 +120,8 @@ class StackMotionEffect {
 
 // Main Initialization
 const init = () => {
+    const isMobile = window.innerWidth <= 768;
+
     // 0. Navbar & Side Menu Logic
     const navLinks = document.querySelectorAll('.navbar__links a, .hero__cta .btn, .side-menu__links a');
     const mobileToggle = document.querySelector('.navbar__mobile-toggle');
@@ -205,7 +219,7 @@ const init = () => {
         });
     });
 
-    // 4. Initialize Stack Effect
+    // 4. Initialize Stack Effect (has its own isMobile logic internally)
     new StackMotionEffect(document.querySelector('.stack-wrap'));
 
     // 5. Contact Form Handler
