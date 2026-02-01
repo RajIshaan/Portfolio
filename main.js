@@ -53,13 +53,13 @@ class StackMotionEffect {
 
         if (this.tl) this.tl.kill();
 
-        // Create a scroll timeline - shorten it on mobile to make it feel snappier
+        // Create a scroll timeline - Restore full length for slow, deliberate feel
         this.tl = gsap.timeline({
             scrollTrigger: {
                 trigger: this.wrapElement,
                 start: 'top top',
-                end: `+=${this.cards.length * (isMobile ? 60 : 100)}%`,
-                scrub: isMobile ? 0.5 : true, // Add light smoothing on mobile
+                end: `+=${this.cards.length * 100}%`,
+                scrub: true,
                 pin: true,
             }
         });
@@ -70,9 +70,9 @@ class StackMotionEffect {
 
             // Initial: Hidden below the view
             gsap.set(card, {
-                yPercent: isMobile ? 120 : 150, // Less travel on mobile
+                yPercent: 150,
                 opacity: 0,
-                scale: isMobile ? 0.95 : 0.9,
+                scale: 0.9,
                 z: 0
             });
 
@@ -81,23 +81,23 @@ class StackMotionEffect {
                 yPercent: 0,
                 opacity: 1,
                 scale: 1,
-                duration: isMobile ? 0.8 : 1, // Faster entry on mobile
+                duration: 1.2, // Slower, more elegant entry
                 ease: 'power2.out'
             }, i);
 
             // 2. Card stays centered for a moment (reading time)
             this.tl.to(card, {
-                duration: isMobile ? 0.3 : 0.5 // Shorter hold on mobile
+                duration: 0.6 // Longer pause for reading
             });
 
             // 3. Card moves slightly UP and back (stacking)
             if (!isLast) {
                 this.tl.to(card, {
-                    yPercent: isMobile ? -5 : -10,
-                    scale: isMobile ? 0.98 : 0.95,
-                    opacity: isMobile ? 0.7 : 0.5, // Better visibility on small screens
-                    filter: isMobile ? 'none' : 'blur(2px)', // Remove laggy blur on mobile
-                    duration: isMobile ? 0.8 : 1,
+                    yPercent: -10,
+                    scale: 0.95,
+                    opacity: 0.5,
+                    filter: isMobile ? 'none' : 'blur(2px)', // Still keep blur off on mobile for performance
+                    duration: 1.2,
                     ease: 'power2.inOut'
                 }, i + 1);
             }
