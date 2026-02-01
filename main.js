@@ -108,26 +108,43 @@ class StackMotionEffect {
 
 // Main Initialization
 const init = () => {
-    // 0. Navbar Smooth Scroll Integration
-    const navLinks = document.querySelectorAll('.navbar__links a, .hero__cta .btn');
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const targetId = link.getAttribute('href');
+    // 0. Navbar & Side Menu Logic
+    const navLinks = document.querySelectorAll('.navbar__links a, .hero__cta .btn, .side-menu__links a');
+    const mobileToggle = document.querySelector('.navbar__mobile-toggle');
+    const sideMenu = document.querySelector('.side-menu');
+    const sideMenuClose = document.querySelector('.side-menu__close');
 
-            // Only prevent default if it's an internal hash link
-            if (targetId.startsWith('#')) {
-                e.preventDefault();
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    lenis.scrollTo(targetElement, {
-                        offset: 0,
-                        duration: 1.5,
-                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-                    });
-                }
-            }
+    if (mobileToggle && sideMenu && sideMenuClose) {
+        mobileToggle.addEventListener('click', () => {
+            sideMenu.classList.add('active');
+            document.body.style.overflow = 'hidden';
         });
-    });
+
+        const closeMenu = () => {
+            sideMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        sideMenuClose.addEventListener('click', closeMenu);
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const targetId = link.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    e.preventDefault();
+                    closeMenu();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        lenis.scrollTo(targetElement, {
+                            offset: 0,
+                            duration: 1.5,
+                            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+                        });
+                    }
+                }
+            });
+        });
+    }
 
     // 1. Hero Animation
     const heroTl = gsap.timeline();
