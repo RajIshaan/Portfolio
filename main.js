@@ -53,27 +53,26 @@ class StackMotionEffect {
 
         if (this.tl) this.tl.kill();
 
-        // Create a long timeline for pinning each card
+        // Create a scroll timeline - shorten it on mobile to make it feel snappier
         this.tl = gsap.timeline({
             scrollTrigger: {
                 trigger: this.wrapElement,
                 start: 'top top',
-                end: `+=${this.cards.length * 100}%`,
-                scrub: true,
+                end: `+=${this.cards.length * (isMobile ? 60 : 100)}%`,
+                scrub: isMobile ? 0.5 : true, // Add light smoothing on mobile
                 pin: true,
             }
         });
 
         // Testimonial-style stacking logic: 
-        // Each card enters from the bottom, settles into view, then pushes slightly up to make room for the next
         this.cards.forEach((card, i) => {
             const isLast = i === this.cards.length - 1;
 
             // Initial: Hidden below the view
             gsap.set(card, {
-                yPercent: 150,
+                yPercent: isMobile ? 120 : 150, // Less travel on mobile
                 opacity: 0,
-                scale: 0.9,
+                scale: isMobile ? 0.95 : 0.9,
                 z: 0
             });
 
@@ -82,25 +81,25 @@ class StackMotionEffect {
                 yPercent: 0,
                 opacity: 1,
                 scale: 1,
-                duration: 1,
+                duration: isMobile ? 0.8 : 1, // Faster entry on mobile
                 ease: 'power2.out'
-            }, i); // Start each card at its index in the timeline
+            }, i);
 
             // 2. Card stays centered for a moment (reading time)
             this.tl.to(card, {
-                duration: 0.5
+                duration: isMobile ? 0.3 : 0.5 // Shorter hold on mobile
             });
 
-            // 3. Card moves slightly UP and back (stacking) to let the NEXT one come in front
+            // 3. Card moves slightly UP and back (stacking)
             if (!isLast) {
                 this.tl.to(card, {
-                    yPercent: -10, // Move up slightly
-                    scale: 0.95,
-                    opacity: 0.5,
-                    filter: 'blur(2px)',
-                    duration: 1,
+                    yPercent: isMobile ? -5 : -10,
+                    scale: isMobile ? 0.98 : 0.95,
+                    opacity: isMobile ? 0.7 : 0.5, // Better visibility on small screens
+                    filter: isMobile ? 'none' : 'blur(2px)', // Remove laggy blur on mobile
+                    duration: isMobile ? 0.8 : 1,
                     ease: 'power2.inOut'
-                }, i + 1); // This happens while the next card is entering
+                }, i + 1);
             }
         });
     }
