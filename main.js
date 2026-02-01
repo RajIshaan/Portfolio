@@ -58,9 +58,10 @@ class StackMotionEffect {
             scrollTrigger: {
                 trigger: this.wrapElement,
                 start: 'top top',
-                end: `+=${this.cards.length * 100}%`,
+                end: `+=${this.cards.length * 70}%`,
                 scrub: true,
                 pin: true,
+                once: true,
             }
         });
 
