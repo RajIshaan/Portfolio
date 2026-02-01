@@ -257,7 +257,16 @@ const init = () => {
     document.body.classList.add('loading-finished');
 };
 
-// Start everything after images are loaded
-preloadImages('.project-card__img').then(() => {
+// Start everything
+const start = () => {
+    // Run initialization immediately
     init();
-});
+
+    // Still preload images for the projects section if it exists
+    const projectImages = document.querySelectorAll('.project-card__img');
+    if (projectImages.length > 0) {
+        preloadImages('.project-card__img');
+    }
+};
+
+start();
